@@ -26,12 +26,9 @@ public class CategoriaResource {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<Categoria> getOnde(@PathVariable Long id) {
+	public ResponseEntity<?> getOne(@PathVariable Long id) {
 		Categoria categoriaEncontrada = categoriaService.findById(id);
-		if (categoriaEncontrada != null)
-			return ResponseEntity.status(HttpStatus.OK).body(categoriaEncontrada);
-		else
-			return ResponseEntity.notFound().build();
+		return ResponseEntity.status(HttpStatus.OK).body(categoriaEncontrada);
 	}
 
 }

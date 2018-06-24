@@ -32,7 +32,7 @@ public class CursomcApplication implements CommandLineRunner {
 		Categoria catDois = new Categoria();
 		catDois.setNome("Escritório");
 
-		Produto produtoUm = new Produto(null, "Computado", 2000D);
+		Produto produtoUm = new Produto(null, "Computador", 2000D);
 		Produto produtoDois = new Produto(null, "Impressora", 800D);
 		Produto produtoTres = new Produto(null, "Mouse", 80D);
 
