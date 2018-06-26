@@ -1,5 +1,6 @@
 package com.viniciosrodrigues.cursomc;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +13,20 @@ import com.viniciosrodrigues.cursomc.domain.Cidade;
 import com.viniciosrodrigues.cursomc.domain.Cliente;
 import com.viniciosrodrigues.cursomc.domain.Endereco;
 import com.viniciosrodrigues.cursomc.domain.Estado;
+import com.viniciosrodrigues.cursomc.domain.Pagamento;
+import com.viniciosrodrigues.cursomc.domain.PagamentoComBoleto;
+import com.viniciosrodrigues.cursomc.domain.PagamentoComCartao;
+import com.viniciosrodrigues.cursomc.domain.Pedido;
 import com.viniciosrodrigues.cursomc.domain.Produto;
+import com.viniciosrodrigues.cursomc.domain.enums.EstadoPagamento;
 import com.viniciosrodrigues.cursomc.domain.enums.TipoCliente;
 import com.viniciosrodrigues.cursomc.repository.CategoriaRepository;
 import com.viniciosrodrigues.cursomc.repository.CidadeRepository;
 import com.viniciosrodrigues.cursomc.repository.ClienteRepository;
 import com.viniciosrodrigues.cursomc.repository.EnderecoRepository;
 import com.viniciosrodrigues.cursomc.repository.EstadoRepository;
+import com.viniciosrodrigues.cursomc.repository.PagamentoRepository;
+import com.viniciosrodrigues.cursomc.repository.PedidoRepository;
 import com.viniciosrodrigues.cursomc.repository.ProdutoRepository;
 
 @SpringBootApplication
@@ -38,6 +46,11 @@ public class CursomcApplication implements CommandLineRunner {
 	private ClienteRepository clienteRepository;
 	@Autowired
 	private EnderecoRepository enderecoRepository;
+
+	@Autowired
+	private PedidoRepository pedidoRepository;
+	@Autowired
+	private PagamentoRepository pagamentoRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(CursomcApplication.class, args);
@@ -109,6 +122,25 @@ public class CursomcApplication implements CommandLineRunner {
 		// Salva os Clientes e Endereços
 		clienteRepository.saveAll(Arrays.asList(clienteUm, clienteDois));
 		enderecoRepository.saveAll(Arrays.asList(enderecoUm, enderecoDois, enderecoTres));
+
+		// Cria Pedidos
+		SimpleDateFormat stf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+		Pedido pedUm = new Pedido(null, stf.parse("30/09/2017 10:32"), clienteUm, enderecoUm);
+		Pedido pedDois = new Pedido(null, stf.parse("10/10/2017 19:35"), clienteDois, enderecoTres);
+
+		// Cria os pagamentos e adiciona aos pedidos
+		Pagamento pagamentoUm = new PagamentoComCartao(null, EstadoPagamento.QUITADO, pedUm, 5);
+		pedUm.setPagamento(pagamentoUm);
+		
+		Pagamento pagamentoDois = new PagamentoComBoleto(null, EstadoPagamento.PENDENTE, pedDois,
+				stf.parse("24/06/2018 16:31"), null);
+		pedDois.setPagamento(pagamentoDois);
+
+		clienteUm.getPedidos().add(pedUm);
+		clienteDois.getPedidos().add(pedDois);
+
+		pedidoRepository.saveAll(Arrays.asList(pedUm, pedDois));
+		pagamentoRepository.saveAll(Arrays.asList(pagamentoUm, pagamentoDois));
 
 	}
 
