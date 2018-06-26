@@ -13,6 +13,7 @@ import com.viniciosrodrigues.cursomc.domain.Cidade;
 import com.viniciosrodrigues.cursomc.domain.Cliente;
 import com.viniciosrodrigues.cursomc.domain.Endereco;
 import com.viniciosrodrigues.cursomc.domain.Estado;
+import com.viniciosrodrigues.cursomc.domain.ItemPedido;
 import com.viniciosrodrigues.cursomc.domain.Pagamento;
 import com.viniciosrodrigues.cursomc.domain.PagamentoComBoleto;
 import com.viniciosrodrigues.cursomc.domain.PagamentoComCartao;
@@ -25,6 +26,7 @@ import com.viniciosrodrigues.cursomc.repository.CidadeRepository;
 import com.viniciosrodrigues.cursomc.repository.ClienteRepository;
 import com.viniciosrodrigues.cursomc.repository.EnderecoRepository;
 import com.viniciosrodrigues.cursomc.repository.EstadoRepository;
+import com.viniciosrodrigues.cursomc.repository.ItemPedidoRepository;
 import com.viniciosrodrigues.cursomc.repository.PagamentoRepository;
 import com.viniciosrodrigues.cursomc.repository.PedidoRepository;
 import com.viniciosrodrigues.cursomc.repository.ProdutoRepository;
@@ -51,6 +53,9 @@ public class CursomcApplication implements CommandLineRunner {
 	private PedidoRepository pedidoRepository;
 	@Autowired
 	private PagamentoRepository pagamentoRepository;
+
+	@Autowired
+	private ItemPedidoRepository itemPedidoRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(CursomcApplication.class, args);
@@ -131,7 +136,7 @@ public class CursomcApplication implements CommandLineRunner {
 		// Cria os pagamentos e adiciona aos pedidos
 		Pagamento pagamentoUm = new PagamentoComCartao(null, EstadoPagamento.QUITADO, pedUm, 5);
 		pedUm.setPagamento(pagamentoUm);
-		
+
 		Pagamento pagamentoDois = new PagamentoComBoleto(null, EstadoPagamento.PENDENTE, pedDois,
 				stf.parse("24/06/2018 16:31"), null);
 		pedDois.setPagamento(pagamentoDois);
@@ -139,8 +144,26 @@ public class CursomcApplication implements CommandLineRunner {
 		clienteUm.getPedidos().add(pedUm);
 		clienteDois.getPedidos().add(pedDois);
 
+		// Salva os pedidos e pagamentos
 		pedidoRepository.saveAll(Arrays.asList(pedUm, pedDois));
 		pagamentoRepository.saveAll(Arrays.asList(pagamentoUm, pagamentoDois));
+
+		// Criando itens de pedidos
+		ItemPedido ipUm = new ItemPedido(pedUm, produtoUm, 0.0, 1, 2000.0);
+		ItemPedido ipDois = new ItemPedido(pedUm, produtoTres, 0.0, 2, 80.0);
+		ItemPedido ipTres = new ItemPedido(pedDois, produtoDois, 100.0, 1, 800.0);
+
+		// Adicionando Itends de pedidos aos pedidos
+		pedUm.getItens().addAll(Arrays.asList(ipUm, ipDois));
+		pedDois.getItens().addAll(Arrays.asList(ipTres));
+
+		// Interligando os Itens do Pedido aos Produtos
+		produtoUm.getItens().add(ipUm);
+		produtoDois.getItens().add(ipTres);
+		produtoTres.getItens().add(ipDois);
+
+		// Salvando itens do pedido
+		itemPedidoRepository.saveAll(Arrays.asList(ipUm, ipDois, ipTres));
 
 	}
 
